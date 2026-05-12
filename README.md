@@ -6,64 +6,64 @@ colorTo: red
 sdk: docker
 app_port: 7860
 pinned: false
-short_description: Real-time fraud scoring with SHAP & drift monitoring
 ---
 
-# FraudWatch
 
-A deployable ML project. Simulated card transactions stream in, a gradient
-boosted model scores each one for fraud in real time, and a dashboard shows the
-live feed, SHAP explanations, drift, and a model comparison. One FastAPI backend
-(plus an in process async worker), one Next.js frontend, PostgreSQL, and MLflow,
-wired with Docker Compose. CPU only; runs on ~8 GB RAM.
+# Real-Time Fraud Detection Platform
 
-Built to demonstrate: feature engineering · model training and comparison
-(XGBoost / LightGBM / RandomForest, time ordered split, class weighting,
-threshold tuning, MLflow tracking) · real time inference · SHAP explainability ·
-PSI drift monitoring · deployment. No Kubernetes, no Kafka, no microservice sprawl.
+A tool for **scoring card transactions for fraud in real time**, not a toy classifier. Fake
+transactions stream in continuously, an ML model flags the suspicious ones live, and you can inspect
+why it decided that, watch for drift, and compare models.
 
-## Pages
+### Screenshots
 
-* **Live Dashboard**: KPIs, fraud rate / volume / latency / score charts, live transaction feed, alert feed, simulation toggle, retrain.
-* **Explainability**: global feature importance plus per prediction SHAP attributions.
-* **Drift Monitoring**: PSI per engineered feature, fraud rate / score shifts vs the deploy time window, plus a "stress test" knob.
-* **Model Comparison**: metrics table (ROC-AUC / PR-AUC / precision / recall / F1 / accuracy), per metric bars, training history, one click model switch.
+![Live Dashboard](assets/dashboard.png)
+*Live fraud dashboard*
 
-## Run
+![Explainability](assets/explainability.png)
+*Per-prediction SHAP attributions*
+
+![Drift](assets/drift.png)
+*Drift monitoring*
+
+## What you can do
+
+- **Watch** : a live feed of transactions with fraud probability and the model's verdict, plus a feed of alerts.
+- **Explain** : global feature importance, and for any prediction the SHAP contributions that pushed it toward fraud or legit.
+- **Compare models** : XGBoost vs LightGBM vs a RandomForest baseline on the same data (ROC-AUC, PR-AUC, precision, recall, F1); switch the live model with one click.
+- **Monitor drift** : PSI on every engineered feature plus fraud-rate and score shifts vs the deploy-time window. A "stress test" button bumps the simulated fraud rate so you can watch the detector react.
+- **Retrain** : kick off a fresh training run from the UI; every run is logged to MLflow.
+
+## How it works
+
+A generator produces realistic fake transactions (amount, merchant, location, device, user, time)
+with noisy fraud patterns. Each one is turned into ~17 features (rolling transaction frequency, spend
+windows, velocity, unusual-location flags, merchant risk, time-of-day, ...), scored by the active
+gradient-boosted model, and stored with its latency. A background worker drives the loop and writes
+drift snapshots periodically. Same feature code runs at train time and serve time.
+
+## Run it locally
+
+You need Docker. `make` is optional.
 
 ```bash
-docker compose up -d --build      # or: make up
+cp .env.example .env     # optional: tweak ports / TRAIN_ROWS / etc.
+make up                  # or: docker compose up -d --build
 ```
 
-| | URL |
-|:--|:--|
-| Dashboard | http://localhost:3030 |
-| API + Swagger | http://localhost:8008/docs |
-| MLflow | http://localhost:5500 |
+App at http://localhost:3030, API docs at http://localhost:8008/docs, MLflow at :5500. First boot
+trains the three models on synthetic data (about a minute) then backfills the dashboard. `make down`
+to stop (`make clean` also drops the volumes).
 
-First boot trains the three models on synthetic data (about a minute) then
-backfills the dashboard. `docker compose down` to stop (`-v` also wipes data and
-trained models). Ports are configurable via `.env` (see `.env.example`).
+## How it's built
+
+Python / FastAPI backend (SQLAlchemy + Postgres, an in-process async worker for the simulation, no
+Celery / Kafka / Kubernetes), XGBoost / LightGBM / scikit-learn with class weighting and threshold
+tuning, SHAP for explanations, PSI for drift, MLflow for experiment tracking. Frontend is Next.js +
+Tailwind + Recharts. Everything's in `docker-compose.yml`. There's also a one-container `Dockerfile`
+(SQLite + file-based MLflow + the static frontend) for small or free hosts.
 
 ## Deploy
 
-See **[DEPLOY.md](DEPLOY.md)**. A **LITE single container build** (root
-`Dockerfile`: SQLite, a file based MLflow store, and the static frontend served
-by FastAPI on port 7860) deploys **free on Hugging Face Spaces**; Fly.io, Render,
-and VPS options are covered too.
-
-## Stack
-
-FastAPI · Python 3.11 · Next.js 14 + Tailwind + Recharts · PostgreSQL · MLflow ·
-XGBoost / LightGBM / scikit-learn · SHAP · Docker Compose.
-
-## Layout
-
-```
-backend/app/   main.py · config.py · db.py · models.py · schemas.py
-  routers/     health, transactions, predict, models, explain, drift, metrics, simulation
-  services/    simulator, features, training, registry, inference, explainer, drift, mlflow_client
-  worker/      loop.py (in process worker: simulate → score → store + drift snapshots)
-frontend/app/  4 pages · components/ (ui primitives, Charts) · lib/api.ts
-docker-compose.yml · Dockerfile (LITE) · Makefile · .env.example · DEPLOY.md
-```
+Three options : Hugging Face Spaces (one container, free), Render or Fly.io, or a single VM with
+docker-compose. See **[DEPLOY.md](DEPLOY.md)**.
