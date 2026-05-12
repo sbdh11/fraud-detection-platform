@@ -1,8 +1,8 @@
 # ---- deps ----
 FROM node:20-alpine AS deps
 WORKDIR /app
-COPY package.json ./
-RUN npm install --no-audit --no-fund
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
 
 # ---- build ----
 FROM node:20-alpine AS build
@@ -10,6 +10,7 @@ WORKDIR /app
 ARG NEXT_PUBLIC_API_BASE=http://localhost:8008/api
 ENV NEXT_PUBLIC_API_BASE=$NEXT_PUBLIC_API_BASE
 ENV NEXT_TELEMETRY_DISABLED=1
+# standalone server build (NEXT_OUTPUT unset → next.config picks "standalone")
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build

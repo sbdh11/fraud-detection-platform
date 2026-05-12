@@ -1,0 +1,16 @@
+# build context for the root (LITE) Dockerfile
+.git
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.venv
+backend/app/ml/artifacts/*.joblib
+backend/app/ml/artifacts/*.json
+backend/data
+*.db
+*.db-wal
+*.db-shm
+frontend/node_modules
+frontend/.next
+frontend/out
+**/.DS_Store

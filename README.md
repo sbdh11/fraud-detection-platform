@@ -1,3 +1,18 @@
+---
+title: Real-Time Fraud Detection Platform
+emoji: 🛡️
+colorFrom: indigo
+colorTo: red
+sdk: docker
+app_port: 7860
+pinned: false
+short_description: Live fraud scoring, SHAP explainability, drift monitoring & model comparison
+---
+
+<!-- ↑ Hugging Face Space config (Docker SDK). When this repo is pushed to a HF
+     Space it builds the root Dockerfile (LITE single-container mode) on port 7860.
+     GitHub just renders the block above as small metadata. See DEPLOY.md. -->
+
 # FraudWatch — Real-Time Fraud Detection Platform
 
 A small but polished, **deployable** machine-learning project: simulated financial
@@ -116,6 +131,11 @@ GET  /api/simulation  /  POST /api/simulation  ( {running?, interval_seconds?, b
 
 ## Deployment notes
 
+See **[DEPLOY.md](DEPLOY.md)** for the full guide — including a **LITE
+single-container build** (root `Dockerfile`: SQLite + file-based MLflow + the
+static frontend served by FastAPI on port 7860) that deploys **free on Hugging
+Face Spaces**, plus Fly.io / Render / VPS options.
+
 - Runs anywhere Docker Compose runs — a single small VPS is plenty (CPU-only,
   no GPU; the whole stack idles well under 8 GB RAM).
 - For a public deployment, rebuild the frontend with `NEXT_PUBLIC_API_BASE` set
@@ -151,5 +171,7 @@ frontend/
   app/                    layout + 4 pages (dashboard, explainability, drift, models)
   components/              Sidebar, ui primitives, Recharts wrappers
   lib/api.ts              typed API client
-docker-compose.yml  Makefile  .env.example
+docker-compose.yml        full 4-service stack
+Dockerfile                LITE single-container build (Hugging Face Spaces) — see DEPLOY.md
+Makefile  .env.example  DEPLOY.md
 ```

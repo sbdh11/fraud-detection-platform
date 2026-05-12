@@ -12,8 +12,12 @@ backend/app/ml/artifacts/*.json
 
 # mlflow / data
 mlruns/
+backend/data/
 backend/data/*.parquet
 backend/data/*.csv
+*.db
+*.db-wal
+*.db-shm
 
 # node / next
 node_modules/

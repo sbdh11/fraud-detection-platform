@@ -74,6 +74,20 @@ app.include_router(metrics_router.router, prefix=_api)
 app.include_router(simulation_router.router, prefix=_api)
 
 
-@app.get("/")
-async def root() -> dict:
-    return {"app": settings.app_name, "docs": "/docs", "api": _api, "health": f"{_api}/health"}
+@app.get(_api)
+async def api_info() -> dict:
+    return {"app": settings.app_name, "docs": "/docs", "api": _api, "health": f"{_api}/health",
+            "lite_mode": settings.lite_mode}
+
+
+# In LITE mode the FastAPI app also serves the prebuilt static frontend (Next.js
+# `output: export`).  Mounted last so all /api/* (and /docs) routes win first.
+if settings.lite_mode and settings.static_dir.exists():
+    from fastapi.staticfiles import StaticFiles
+
+    app.mount("/", StaticFiles(directory=str(settings.static_dir), html=True), name="frontend")
+    log.info("serving static frontend from %s", settings.static_dir)
+else:
+    @app.get("/")
+    async def root() -> dict:
+        return {"app": settings.app_name, "docs": "/docs", "api": _api, "health": f"{_api}/health"}

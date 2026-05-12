@@ -20,15 +20,19 @@ async def health(session: AsyncSession = Depends(get_session)) -> dict:
     except Exception:
         db_ok = False
 
-    mlflow_ok = False
-    try:
-        import httpx
-
-        async with httpx.AsyncClient(timeout=1.5) as client:
-            r = await client.get(settings.mlflow_tracking_uri.rstrip("/") + "/health")
-            mlflow_ok = r.status_code < 500
-    except Exception:
+    uri = settings.mlflow_tracking_uri
+    if uri.startswith("file:"):
+        mlflow_ok = True  # local file store — always available
+    else:
         mlflow_ok = False
+        try:
+            import httpx
+
+            async with httpx.AsyncClient(timeout=1.5) as client:
+                r = await client.get(uri.rstrip("/") + "/health")
+                mlflow_ok = r.status_code < 500
+        except Exception:
+            mlflow_ok = False
 
     bundle = inference.get_bundle()
     return {

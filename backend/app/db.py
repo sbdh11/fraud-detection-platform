@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 from collections.abc import AsyncIterator
 
+from sqlalchemy import event
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
     async_sessionmaker,
@@ -18,7 +19,28 @@ class Base(DeclarativeBase):
     pass
 
 
-engine = create_async_engine(settings.database_url, pool_pre_ping=True, future=True)
+def _make_engine():
+    if settings.is_sqlite:
+        # single-file DB shared by the request handlers + the background worker:
+        # a generous busy-timeout + WAL keeps the occasional concurrent write happy.
+        eng = create_async_engine(
+            settings.database_url, future=True,
+            connect_args={"timeout": 30},
+        )
+
+        @event.listens_for(eng.sync_engine, "connect")
+        def _sqlite_pragmas(dbapi_conn, _rec):  # pragma: no cover
+            cur = dbapi_conn.cursor()
+            cur.execute("PRAGMA journal_mode=WAL")
+            cur.execute("PRAGMA synchronous=NORMAL")
+            cur.execute("PRAGMA busy_timeout=30000")
+            cur.close()
+
+        return eng
+    return create_async_engine(settings.database_url, pool_pre_ping=True, future=True)
+
+
+engine = _make_engine()
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
 
