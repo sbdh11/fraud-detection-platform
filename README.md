@@ -11,9 +11,8 @@ pinned: false
 
 # Real-Time Fraud Detection Platform
 
-A tool for **scoring card transactions for fraud in real time**, not a toy classifier. Fake
-transactions stream in continuously, an ML model flags the suspicious ones live, and you can inspect
-why it decided that, watch for drift, and compare models.
+A real-time fraud detection platform for monitoring and analyzing suspicious card transactions using machine learning. Simulates live transaction streams, scores fraud probability in real time, supports model comparison (XGBoost, LightGBM, RandomForest), SHAP-based explainability, drift monitoring, MLflow experiment tracking, and live dashboards for latency, fraud alerts, and prediction analysis.
+
 
 ### Preview
 
