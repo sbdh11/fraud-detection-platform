@@ -6,7 +6,7 @@ colorTo: red
 sdk: docker
 app_port: 7860
 pinned: false
-short_description: Live fraud scoring, SHAP explainability, drift monitoring & model comparison
+short_description: Real-time fraud scoring with SHAP & drift monitoring
 ---
 
 <!-- ↑ Hugging Face Space config (Docker SDK). When this repo is pushed to a HF
