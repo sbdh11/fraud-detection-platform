@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// ----------------------------------------------------------------- hooks
 export function useInterval(fn: () => void, ms: number, immediate = true) {
   const saved = useRef(fn);
   saved.current = fn;
@@ -48,7 +47,6 @@ export function usePolling<T>(loader: () => Promise<T>, ms: number, deps: unknow
   return { data, error, loading };
 }
 
-// ----------------------------------------------------------------- format
 export const fmt = {
   pct: (x: number | null | undefined, d = 1) => (x == null ? "—" : `${(x * 100).toFixed(d)}%`),
   num: (x: number | null | undefined, d = 0) =>
@@ -59,7 +57,6 @@ export const fmt = {
   feature: (k: string) => k.replace(/_/g, " "),
 };
 
-// ----------------------------------------------------------------- atoms
 export function PageHeader({
   title,
   subtitle,

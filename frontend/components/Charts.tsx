@@ -28,7 +28,7 @@ const C = {
 };
 const AXIS = { stroke: C.axis, fontSize: 11 } as const;
 
-// dark-themed tooltip + hover cursors (Recharts' defaults are light)
+// Recharts defaults render light — force dark
 const TT = {
   contentStyle: {
     background: "hsl(var(--popover))",
@@ -223,7 +223,6 @@ export function ModelMetricBars({
   );
 }
 
-// drift-page timelines
 export function PsiTimeline({ data }: { data: { t: string; psi: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
