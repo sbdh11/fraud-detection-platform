@@ -1,0 +1,74 @@
+name: fraud-detection
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: fraud
+      POSTGRES_PASSWORD: fraud
+      POSTGRES_DB: fraud
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fraud -d fraud"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    ports:
+      - "${DB_PORT:-5544}:5432"
+
+  mlflow:
+    image: ghcr.io/mlflow/mlflow:v2.16.2
+    command: >
+      mlflow server
+      --host 0.0.0.0 --port 5000
+      --backend-store-uri sqlite:////mlruns/mlflow.db
+      --default-artifact-root /mlruns/artifacts
+    volumes:
+      - mlruns:/mlruns
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:5000/health').status==200 else 1)\""]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 20s
+    ports:
+      - "${MLFLOW_PORT:-5500}:5000"
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://fraud:fraud@db:5432/fraud
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_EXPERIMENT: fraud-detection
+      SIM_ENABLED: "true"
+      SIM_INTERVAL_SECONDS: "1.5"
+      TRAIN_ON_STARTUP: "true"
+      TRAIN_ROWS: "30000"
+      CORS_ORIGINS: "*"
+    depends_on:
+      db:
+        condition: service_healthy
+      mlflow:
+        condition: service_started
+    volumes:
+      - artifacts:/app/app/ml/artifacts
+    ports:
+      - "${BACKEND_PORT:-8008}:8000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_BASE: "http://localhost:${BACKEND_PORT:-8008}/api"
+    environment:
+      NEXT_PUBLIC_API_BASE: "http://localhost:${BACKEND_PORT:-8008}/api"
+    depends_on:
+      - backend
+    ports:
+      - "${FRONTEND_PORT:-3030}:3000"
+
+volumes:
+  pgdata:
+  mlruns:
+  artifacts:

@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(45, 212, 191, 0.08), transparent 60%),
+    radial-gradient(900px 500px at -10% 110%, rgba(99, 102, 241, 0.07), transparent 60%), #070a12;
+  color: #e6edf6;
+  min-height: 100%;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27324f transparent;
+}
+*::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  background: #27324f;
+  border-radius: 8px;
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-ink-700/70 bg-ink-850/70 backdrop-blur p-5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.6)];
+  }
+  .card-tight {
+    @apply rounded-2xl border border-ink-700/70 bg-ink-850/70 backdrop-blur p-4;
+  }
+  .label {
+    @apply text-[11px] uppercase tracking-widest text-slate-400;
+  }
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  }
+  .btn {
+    @apply inline-flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-800 px-3 py-1.5 text-sm font-medium text-slate-200 transition hover:border-brand-500/60 hover:text-white disabled:opacity-40 disabled:hover:border-ink-600;
+  }
+  .btn-primary {
+    @apply border-brand-500/40 bg-brand-600/15 text-brand-400 hover:bg-brand-600/25 hover:text-brand-400;
+  }
+  .table-cell {
+    @apply px-3 py-2 text-sm;
+  }
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}

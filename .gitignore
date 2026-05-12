@@ -1,0 +1,32 @@
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# model artifacts (regenerated on first run)
+backend/app/ml/artifacts/*.joblib
+backend/app/ml/artifacts/*.json
+!backend/app/ml/artifacts/.gitkeep
+
+# mlflow / data
+mlruns/
+backend/data/*.parquet
+backend/data/*.csv
+
+# node / next
+node_modules/
+.next/
+out/
+.turbo/
+
+# env
+.env
+.env.local
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
