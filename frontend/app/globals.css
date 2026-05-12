@@ -2,54 +2,63 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  color-scheme: dark;
+@layer base {
+  :root {
+    /* shadcn-style tokens — dark by default for this app */
+    --background: 240 10% 4%;
+    --foreground: 0 0% 95%;
+    --card: 240 8% 6.5%;
+    --card-foreground: 0 0% 95%;
+    --popover: 240 10% 5%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 172 66% 50%;            /* teal accent */
+    --primary-foreground: 240 10% 4%;
+    --secondary: 240 6% 12%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 240 6% 12%;
+    --muted-foreground: 240 5% 62%;
+    --accent: 240 6% 15%;
+    --accent-foreground: 0 0% 95%;
+    --destructive: 350 89% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 240 10% 4%;
+    --border: 240 6% 16%;
+    --input: 240 6% 16%;
+    --ring: 172 66% 50%;
+    --chart-1: 172 66% 50%;
+    --chart-2: 350 89% 60%;
+    --chart-3: 245 58% 67%;
+    --chart-4: 38 92% 55%;
+    --chart-5: 199 89% 56%;
+    --radius: 0.7rem;
+    --sidebar-background: 240 10% 5%;
+    --sidebar-foreground: 0 0% 88%;
+    --sidebar-accent: 240 6% 12%;
+    --sidebar-border: 240 6% 14%;
+  }
 }
 
-html,
-body {
-  background: radial-gradient(1200px 600px at 80% -10%, rgba(45, 212, 191, 0.08), transparent 60%),
-    radial-gradient(900px 500px at -10% 110%, rgba(99, 102, 241, 0.07), transparent 60%), #070a12;
-  color: #e6edf6;
-  min-height: 100%;
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    background-image: radial-gradient(1200px 600px at 85% -10%, hsl(172 66% 50% / 0.07), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, hsl(245 58% 60% / 0.06), transparent 60%);
+    min-height: 100vh;
+  }
 }
 
 * {
   scrollbar-width: thin;
-  scrollbar-color: #27324f transparent;
+  scrollbar-color: hsl(var(--border)) transparent;
 }
-*::-webkit-scrollbar {
-  height: 8px;
-  width: 8px;
-}
-*::-webkit-scrollbar-thumb {
-  background: #27324f;
-  border-radius: 8px;
-}
-
-@layer components {
-  .card {
-    @apply rounded-2xl border border-ink-700/70 bg-ink-850/70 backdrop-blur p-5 shadow-[0_8px_30px_-12px_rgba(0,0,0,0.6)];
-  }
-  .card-tight {
-    @apply rounded-2xl border border-ink-700/70 bg-ink-850/70 backdrop-blur p-4;
-  }
-  .label {
-    @apply text-[11px] uppercase tracking-widest text-slate-400;
-  }
-  .pill {
-    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium;
-  }
-  .btn {
-    @apply inline-flex items-center gap-2 rounded-lg border border-ink-600 bg-ink-800 px-3 py-1.5 text-sm font-medium text-slate-200 transition hover:border-brand-500/60 hover:text-white disabled:opacity-40 disabled:hover:border-ink-600;
-  }
-  .btn-primary {
-    @apply border-brand-500/40 bg-brand-600/15 text-brand-400 hover:bg-brand-600/25 hover:text-brand-400;
-  }
-  .table-cell {
-    @apply px-3 py-2 text-sm;
-  }
-}
+*::-webkit-scrollbar { height: 8px; width: 8px; }
+*::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 8px; }
 
 .tabular {
   font-variant-numeric: tabular-nums;

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ----------------------------------------------------------------- hooks
 export function useInterval(fn: () => void, ms: number, immediate = true) {
@@ -53,10 +55,7 @@ export const fmt = {
     x == null ? "—" : x.toLocaleString(undefined, { maximumFractionDigits: d, minimumFractionDigits: d }),
   ms: (x: number | null | undefined) => (x == null ? "—" : `${x.toFixed(x < 10 ? 2 : 1)} ms`),
   prob: (x: number | null | undefined) => (x == null ? "—" : x.toFixed(3)),
-  time: (s: string) => {
-    const d = new Date(s);
-    return d.toLocaleTimeString(undefined, { hour12: false });
-  },
+  time: (s: string) => new Date(s).toLocaleTimeString(undefined, { hour12: false }),
   feature: (k: string) => k.replace(/_/g, " "),
 };
 
@@ -64,103 +63,76 @@ export const fmt = {
 export function PageHeader({
   title,
   subtitle,
+  icon,
   right,
 }: {
   title: string;
   subtitle?: string;
+  icon?: React.ReactNode;
   right?: React.ReactNode;
 }) {
   return (
     <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
+      <div className="flex items-start gap-3">
+        {icon && (
+          <div className="mt-0.5 rounded-lg border border-border/70 bg-card p-2 text-primary">{icon}</div>
+        )}
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">{title}</h1>
+          {subtitle && <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{subtitle}</p>}
+        </div>
       </div>
       {right}
     </div>
   );
 }
 
-export function Card({
-  title,
-  right,
-  children,
-  className = "",
-}: {
-  title?: React.ReactNode;
-  right?: React.ReactNode;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`card ${className}`}>
-      {(title || right) && (
-        <div className="mb-4 flex items-center justify-between gap-3">
-          {typeof title === "string" ? <h2 className="text-sm font-semibold text-slate-200">{title}</h2> : title}
-          {right}
-        </div>
-      )}
-      {children}
-    </div>
-  );
-}
+const TONE = {
+  default: "text-foreground",
+  primary: "text-primary",
+  success: "text-success",
+  warning: "text-warning",
+  destructive: "text-destructive",
+} as const;
+type Tone = keyof typeof TONE;
 
 export function Stat({
   label,
   value,
   hint,
+  icon,
   tone = "default",
 }: {
   label: string;
   value: React.ReactNode;
   hint?: React.ReactNode;
-  tone?: "default" | "ok" | "warn" | "danger" | "brand";
+  icon?: React.ReactNode;
+  tone?: Tone;
 }) {
-  const toneCls = {
-    default: "text-white",
-    ok: "text-ok-400",
-    warn: "text-warn-400",
-    danger: "text-danger-400",
-    brand: "text-brand-400",
-  }[tone];
   return (
-    <div className="card-tight">
-      <div className="label">{label}</div>
-      <div className={`mt-1.5 text-2xl font-semibold tabular ${toneCls}`}>{value}</div>
-      {hint != null && <div className="mt-1 text-xs text-slate-500">{hint}</div>}
+    <div className="rounded-xl border border-border/70 bg-card p-4">
+      <div className="flex items-center justify-between">
+        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</span>
+        {icon && <span className="text-muted-foreground/70">{icon}</span>}
+      </div>
+      <div className={cn("mt-1.5 text-2xl font-semibold tabular", TONE[tone])}>{value}</div>
+      {hint != null && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
     </div>
   );
-}
-
-export function Badge({
-  children,
-  tone = "default",
-}: {
-  children: React.ReactNode;
-  tone?: "default" | "ok" | "warn" | "danger" | "brand";
-}) {
-  const map = {
-    default: "bg-ink-700/60 text-slate-300",
-    ok: "bg-ok-500/15 text-ok-400 ring-1 ring-ok-500/25",
-    warn: "bg-warn-500/15 text-warn-400 ring-1 ring-warn-500/25",
-    danger: "bg-danger-500/15 text-danger-400 ring-1 ring-danger-500/25",
-    brand: "bg-brand-600/15 text-brand-400 ring-1 ring-brand-500/25",
-  }[tone];
-  return <span className={`pill ${map}`}>{children}</span>;
 }
 
 export function ProbBar({ p, threshold }: { p: number; threshold?: number }) {
   const pct = Math.max(0, Math.min(1, p)) * 100;
   const over = threshold != null && p >= threshold;
   return (
-    <div className="relative h-2 w-full overflow-hidden rounded-full bg-ink-700/70">
+    <div className="relative h-2 w-full overflow-hidden rounded-full bg-secondary">
       <div
-        className={`h-full rounded-full ${over ? "bg-danger-500" : "bg-brand-500"}`}
+        className={cn("h-full rounded-full transition-all", over ? "bg-destructive" : "bg-primary")}
         style={{ width: `${pct}%` }}
       />
       {threshold != null && (
         <div
-          className="absolute top-0 h-full w-px bg-slate-300/70"
+          className="absolute top-0 h-full w-px bg-foreground/60"
           style={{ left: `${Math.min(100, threshold * 100)}%` }}
           title={`threshold ${threshold.toFixed(3)}`}
         />
@@ -171,46 +143,35 @@ export function ProbBar({ p, threshold }: { p: number; threshold?: number }) {
 
 export function Spinner({ label }: { label?: string }) {
   return (
-    <div className="flex items-center gap-2 text-sm text-slate-500">
-      <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-slate-600 border-t-brand-400" />
+    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      <span className="size-3.5 animate-spin rounded-full border-2 border-muted border-t-primary" />
       {label ?? "loading…"}
+    </div>
+  );
+}
+
+export function CardSkeleton({ rows = 4 }: { rows?: number }) {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: rows }).map((_, i) => (
+        <Skeleton key={i} className="h-7 w-full" />
+      ))}
     </div>
   );
 }
 
 export function ErrorNote({ msg }: { msg: string }) {
   return (
-    <div className="rounded-lg border border-danger-500/30 bg-danger-500/10 px-3 py-2 text-sm text-danger-400">
+    <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
       {msg}
     </div>
   );
 }
 
-export function Toggle({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (v: boolean) => void;
-  label?: string;
-}) {
-  return (
-    <button
-      onClick={() => onChange(!checked)}
-      className="flex items-center gap-2 text-sm text-slate-300"
-      type="button"
-    >
-      <span
-        className={`relative h-5 w-9 rounded-full transition ${checked ? "bg-brand-600" : "bg-ink-600"}`}
-      >
-        <span
-          className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition ${
-            checked ? "left-[18px]" : "left-0.5"
-          }`}
-        />
-      </span>
-      {label}
-    </button>
-  );
+export function Note({ children, tone = "primary" }: { children: React.ReactNode; tone?: "primary" | "warning" }) {
+  const cls =
+    tone === "warning"
+      ? "border-warning/30 bg-warning/10 text-warning"
+      : "border-primary/30 bg-primary/10 text-primary";
+  return <div className={cn("rounded-lg border px-3 py-2 text-sm", cls)}>{children}</div>;
 }

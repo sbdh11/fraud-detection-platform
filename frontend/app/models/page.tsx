@@ -1,9 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { BarChart3, RefreshCw } from "lucide-react";
 import { api, ModelRun } from "@/lib/api";
 import { ModelMetricBars } from "@/components/Charts";
-import { Badge, Card, ErrorNote, fmt, PageHeader, Spinner } from "@/components/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CardSkeleton, ErrorNote, fmt, Note, PageHeader } from "@/components/widgets";
 
 const METRIC_COLS: { key: string; label: string }[] = [
   { key: "roc_auc", label: "ROC-AUC" },
@@ -42,7 +47,6 @@ export default function ModelsPage() {
 
   const activeName: string | null = active?.active_model ?? null;
   const training = active?.training ?? null;
-
   const orderedLatest = useMemo(
     () => latest.slice().sort((a, b) => (b.metrics?.pr_auc ?? 0) - (a.metrics?.pr_auc ?? 0)),
     [latest],
@@ -61,13 +65,12 @@ export default function ModelsPage() {
       setBusy(null);
     }
   };
-
   const retrain = async () => {
     setBusy("__train__");
     setMsg(null);
     try {
       await api.train();
-      setMsg("Training started — refresh in ~30–60s.");
+      setMsg("Training started — refresh in ~30–60 s.");
     } catch (e: any) {
       setMsg(`Could not start training: ${e?.message ?? e}`);
     } finally {
@@ -82,113 +85,123 @@ export default function ModelsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Model Comparison"
-        subtitle="XGBoost vs LightGBM vs RandomForest baseline — trained on the same synthetic data, tracked in MLflow."
+        subtitle="XGBoost vs LightGBM vs a RandomForest baseline — trained on the same synthetic data, tracked in MLflow."
+        icon={<BarChart3 className="size-5" />}
         right={
           <div className="flex items-center gap-3">
-            <button className="btn btn-primary" onClick={retrain} disabled={busy === "__train__" || training?.running}>
-              {training?.running ? "training…" : "↻ Retrain all models"}
-            </button>
-            {activeName && <Badge tone="brand">active: {activeName}</Badge>}
+            <Button variant="subtle" size="sm" onClick={retrain} disabled={busy === "__train__" || training?.running}>
+              <RefreshCw className="size-3.5" /> {training?.running ? "training…" : "Retrain all models"}
+            </Button>
+            {activeName && <Badge variant="primary">active: {activeName}</Badge>}
           </div>
         }
       />
       {err && <ErrorNote msg={err} />}
-      {msg && <div className="rounded-lg border border-brand-500/30 bg-brand-600/10 px-3 py-2 text-sm text-brand-400">{msg}</div>}
-      {training?.running && <div className="rounded-lg border border-warn-500/30 bg-warn-500/10 px-3 py-2 text-sm text-warn-400">Training in progress…</div>}
+      {msg && <Note>{msg}</Note>}
+      {training?.running && <Note tone="warning">Training in progress…</Note>}
 
       {orderedLatest.length === 0 ? (
-        <Card><Spinner label="no model runs yet — train one." /></Card>
+        <Card>
+          <CardContent className="pt-5"><CardSkeleton rows={5} /></CardContent>
+        </Card>
       ) : (
         <>
-          <Card title="Latest run per model">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="text-left text-[11px] uppercase tracking-wider text-slate-500">
-                  <tr>
-                    <th className="table-cell">Model</th>
+          <Card>
+            <CardHeader><CardTitle>Latest run per model</CardTitle></CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Model</TableHead>
                     {METRIC_COLS.map((c) => (
-                      <th key={c.key} className="table-cell text-right">{c.label}</th>
+                      <TableHead key={c.key} className="text-right">{c.label}</TableHead>
                     ))}
-                    <th className="table-cell text-right">Threshold</th>
-                    <th className="table-cell text-right">Train / Test</th>
-                    <th className="table-cell"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-ink-700/50">
+                    <TableHead className="text-right">Threshold</TableHead>
+                    <TableHead className="text-right">Train / Test</TableHead>
+                    <TableHead />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {orderedLatest.map((m) => (
-                    <tr key={m.id} className={m.model_name === activeName ? "bg-brand-600/[0.07]" : "hover:bg-ink-800/40"}>
-                      <td className="table-cell font-medium text-slate-200">
+                    <TableRow key={m.id} className={m.model_name === activeName ? "bg-primary/[0.07]" : undefined}>
+                      <TableCell className="font-medium">
                         {m.model_name}
-                        {m.model_name === activeName && <span className="ml-2"><Badge tone="brand">active</Badge></span>}
-                      </td>
+                        {m.model_name === activeName && <Badge variant="primary" className="ml-2">active</Badge>}
+                      </TableCell>
                       {METRIC_COLS.map((c) => {
                         const v = m.metrics?.[c.key];
                         const best = orderedLatest.every((o) => (o.metrics?.[c.key] ?? -1) <= (v ?? -1));
                         return (
-                          <td key={c.key} className={`table-cell text-right tabular ${best ? "text-brand-400" : "text-slate-300"}`}>
+                          <TableCell key={c.key} className={`text-right tabular ${best ? "text-primary" : ""}`}>
                             {v != null ? Number(v).toFixed(4) : "—"}
-                          </td>
+                          </TableCell>
                         );
                       })}
-                      <td className="table-cell text-right tabular text-slate-400">{m.threshold?.toFixed(3) ?? "—"}</td>
-                      <td className="table-cell text-right tabular text-slate-500">{fmt.num(m.n_train)} / {fmt.num(m.n_test)}</td>
-                      <td className="table-cell text-right">
-                        <button
-                          className="btn"
-                          disabled={m.model_name === activeName || busy === m.model_name}
-                          onClick={() => activate(m.model_name)}
-                        >
+                      <TableCell className="text-right tabular text-muted-foreground">{m.threshold?.toFixed(3) ?? "—"}</TableCell>
+                      <TableCell className="text-right tabular text-muted-foreground/80">
+                        {fmt.num(m.n_train)} / {fmt.num(m.n_test)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="outline" size="sm" disabled={m.model_name === activeName || busy === m.model_name} onClick={() => activate(m.model_name)}>
                           {busy === m.model_name ? "…" : m.model_name === activeName ? "in use" : "Activate"}
-                        </button>
-                      </td>
-                    </tr>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </tbody>
-              </table>
-            </div>
-            {active?.run?.mlflow_run_id && (
-              <p className="mt-3 text-[11px] text-slate-500">Active MLflow run: <span className="font-mono">{active.run.mlflow_run_id}</span> (experiment “fraud-detection”).</p>
-            )}
+                </TableBody>
+              </Table>
+              {active?.run?.mlflow_run_id && (
+                <p className="mt-3 text-[11px] text-muted-foreground">
+                  Active MLflow run: <span className="font-mono">{active.run.mlflow_run_id}</span> (experiment “fraud-detection”).
+                </p>
+              )}
+            </CardContent>
           </Card>
 
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <Card title="ROC-AUC"><ModelMetricBars models={metricBarData("roc_auc")} metric="roc_auc" label="ROC-AUC" /></Card>
-            <Card title="PR-AUC (imbalanced)"><ModelMetricBars models={metricBarData("pr_auc")} metric="pr_auc" label="PR-AUC" /></Card>
-            <Card title="F1 @ tuned threshold"><ModelMetricBars models={metricBarData("f1")} metric="f1" label="F1" /></Card>
-            <Card title="Precision"><ModelMetricBars models={metricBarData("precision")} metric="precision" label="Precision" /></Card>
-            <Card title="Recall"><ModelMetricBars models={metricBarData("recall")} metric="recall" label="Recall" /></Card>
-            <Card title="Accuracy"><ModelMetricBars models={metricBarData("accuracy")} metric="accuracy" label="Accuracy" /></Card>
+            {METRIC_COLS.map((c) => (
+              <Card key={c.key}>
+                <CardHeader><CardTitle>{c.label}</CardTitle></CardHeader>
+                <CardContent><ModelMetricBars models={metricBarData(c.key)} label={c.label} /></CardContent>
+              </Card>
+            ))}
           </div>
 
-          <Card title="Training history (all runs)">
-            <div className="max-h-80 overflow-auto">
-              <table className="w-full">
-                <thead className="sticky top-0 bg-ink-850/95 text-left text-[11px] uppercase tracking-wider text-slate-500 backdrop-blur">
-                  <tr>
-                    <th className="table-cell">When</th>
-                    <th className="table-cell">Model</th>
-                    <th className="table-cell text-right">ROC-AUC</th>
-                    <th className="table-cell text-right">PR-AUC</th>
-                    <th className="table-cell text-right">F1</th>
-                    <th className="table-cell text-right">Rows</th>
-                    <th className="table-cell">MLflow run</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-ink-700/50">
-                  {history.map((m) => (
-                    <tr key={m.id} className="hover:bg-ink-800/40">
-                      <td className="table-cell tabular text-slate-400">{new Date(m.ts).toLocaleString()}</td>
-                      <td className="table-cell text-slate-300">{m.model_name}{m.is_active && <span className="ml-1 text-brand-400">●</span>}</td>
-                      <td className="table-cell text-right tabular">{m.metrics?.roc_auc?.toFixed(4) ?? "—"}</td>
-                      <td className="table-cell text-right tabular">{m.metrics?.pr_auc?.toFixed(4) ?? "—"}</td>
-                      <td className="table-cell text-right tabular">{m.metrics?.f1?.toFixed(4) ?? "—"}</td>
-                      <td className="table-cell text-right tabular text-slate-500">{fmt.num((m.n_train ?? 0) + (m.n_test ?? 0))}</td>
-                      <td className="table-cell font-mono text-[11px] text-slate-500">{m.mlflow_run_id ?? "—"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <Card>
+            <CardHeader><CardTitle>Training history · all runs</CardTitle></CardHeader>
+            <CardContent>
+              <div className="max-h-80 overflow-auto">
+                <Table>
+                  <TableHeader className="sticky top-0 bg-card/95 backdrop-blur">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead>When</TableHead>
+                      <TableHead>Model</TableHead>
+                      <TableHead className="text-right">ROC-AUC</TableHead>
+                      <TableHead className="text-right">PR-AUC</TableHead>
+                      <TableHead className="text-right">F1</TableHead>
+                      <TableHead className="text-right">Rows</TableHead>
+                      <TableHead>MLflow run</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {history.map((m) => (
+                      <TableRow key={m.id}>
+                        <TableCell className="tabular text-muted-foreground">{new Date(m.ts).toLocaleString()}</TableCell>
+                        <TableCell>
+                          {m.model_name}
+                          {m.is_active && <span className="ml-1 text-primary">●</span>}
+                        </TableCell>
+                        <TableCell className="text-right tabular">{m.metrics?.roc_auc?.toFixed(4) ?? "—"}</TableCell>
+                        <TableCell className="text-right tabular">{m.metrics?.pr_auc?.toFixed(4) ?? "—"}</TableCell>
+                        <TableCell className="text-right tabular">{m.metrics?.f1?.toFixed(4) ?? "—"}</TableCell>
+                        <TableCell className="text-right tabular text-muted-foreground/80">{fmt.num((m.n_train ?? 0) + (m.n_test ?? 0))}</TableCell>
+                        <TableCell className="font-mono text-[11px] text-muted-foreground">{m.mlflow_run_id ?? "—"}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
           </Card>
         </>
       )}
