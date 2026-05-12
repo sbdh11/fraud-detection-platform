@@ -14,18 +14,14 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
     cors_origins: str = "*"
 
-    # --- LITE single-container mode (e.g. Hugging Face Spaces) ---
-    # When on: SQLite instead of Postgres, file-based MLflow, and FastAPI serves
-    # the prebuilt static frontend.  Toggled by the env var LITE_MODE.
+    # --- LITE single-container mode (env LITE_MODE): SQLite + file-MLflow + static frontend ---
     lite_mode: bool = False
-    data_dir: Path = Path("/app/data")           # writable scratch dir in LITE mode
-    static_dir: Path = Path("/app/static")       # exported Next.js site (LITE mode)
+    data_dir: Path = Path("/app/data")           # writable scratch dir (LITE)
+    static_dir: Path = Path("/app/static")       # exported Next.js site (LITE)
 
-    # --- Database ---
-    database_url: str = ""                        # empty → derived from lite_mode
-
-    # --- MLflow ---
-    mlflow_tracking_uri: str = ""                 # empty → derived from lite_mode
+    # --- Database / MLflow (empty → derived from lite_mode) ---
+    database_url: str = ""
+    mlflow_tracking_uri: str = ""
     mlflow_experiment: str = "fraud-detection"
 
     # --- Model artifacts ---

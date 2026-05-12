@@ -21,12 +21,8 @@ class Base(DeclarativeBase):
 
 def _make_engine():
     if settings.is_sqlite:
-        # single-file DB shared by the request handlers + the background worker:
-        # a generous busy-timeout + WAL keeps the occasional concurrent write happy.
-        eng = create_async_engine(
-            settings.database_url, future=True,
-            connect_args={"timeout": 30},
-        )
+        # WAL + busy-timeout: handlers and the worker share one file
+        eng = create_async_engine(settings.database_url, future=True, connect_args={"timeout": 30})
 
         @event.listens_for(eng.sync_engine, "connect")
         def _sqlite_pragmas(dbapi_conn, _rec):  # pragma: no cover

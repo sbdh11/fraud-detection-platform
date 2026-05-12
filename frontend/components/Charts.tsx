@@ -28,16 +28,22 @@ const C = {
 };
 const AXIS = { stroke: C.axis, fontSize: 11 } as const;
 
-function tip(extra?: React.CSSProperties): React.CSSProperties {
-  return {
+// dark-themed tooltip + hover cursors (Recharts' defaults are light)
+const TT = {
+  contentStyle: {
     background: "hsl(var(--popover))",
     border: "1px solid hsl(var(--border))",
-    borderRadius: 10,
+    borderRadius: 6,
     fontSize: 12,
-    color: "hsl(var(--popover-foreground))",
-    ...extra,
-  };
-}
+    padding: "6px 10px",
+    boxShadow: "0 4px 16px rgba(0,0,0,0.45)",
+  } as React.CSSProperties,
+  labelStyle: { color: "hsl(var(--muted-foreground))", marginBottom: 2 } as React.CSSProperties,
+  itemStyle: { color: "hsl(var(--popover-foreground))", padding: 0 } as React.CSSProperties,
+};
+const barCursor = { fill: "hsl(var(--muted))", fillOpacity: 0.45 };
+const lineCursor = { stroke: "hsl(var(--muted-foreground))", strokeWidth: 1, strokeDasharray: "3 3" };
+
 const hm = (s: string) => new Date(s).toLocaleTimeString(undefined, { hour12: false }).slice(0, 5);
 const full = (s: string | number) => new Date(s as string).toLocaleTimeString();
 
@@ -55,7 +61,8 @@ export function FraudRateChart({ data }: { data: { t: string; fraud_rate: number
         <XAxis dataKey="t" tickFormatter={hm} {...AXIS} minTickGap={28} />
         <YAxis tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} {...AXIS} width={42} />
         <Tooltip
-          contentStyle={tip()}
+          {...TT}
+          cursor={lineCursor}
           labelFormatter={full}
           formatter={(v: any, n: any) => (n === "fraud_rate" ? [`${(v * 100).toFixed(2)}%`, "fraud rate"] : [v, n])}
         />
@@ -72,7 +79,7 @@ export function VolumeChart({ data }: { data: { t: string; count: number; fraud_
         <CartesianGrid stroke={C.grid} vertical={false} />
         <XAxis dataKey="t" tickFormatter={hm} {...AXIS} minTickGap={28} />
         <YAxis {...AXIS} width={36} allowDecimals={false} />
-        <Tooltip contentStyle={tip()} labelFormatter={full} />
+        <Tooltip {...TT} cursor={barCursor} labelFormatter={full} />
         <Bar dataKey="count" fill={C.teal} radius={[2, 2, 0, 0]} name="transactions" />
         <Bar dataKey="fraud_count" fill={C.red} radius={[2, 2, 0, 0]} name="fraud alerts" />
       </BarChart>
@@ -87,7 +94,7 @@ export function LatencyChart({ data }: { data: { t: string; avg_latency_ms: numb
         <CartesianGrid stroke={C.grid} vertical={false} />
         <XAxis dataKey="t" tickFormatter={hm} {...AXIS} minTickGap={28} />
         <YAxis {...AXIS} width={42} />
-        <Tooltip contentStyle={tip()} labelFormatter={full} formatter={(v: any) => [`${Number(v).toFixed(2)} ms`, "avg latency"]} />
+        <Tooltip {...TT} cursor={lineCursor} labelFormatter={full} formatter={(v: any) => [`${Number(v).toFixed(2)} ms`, "avg latency"]} />
         <Line type="monotone" dataKey="avg_latency_ms" stroke={C.teal} strokeWidth={2} dot={false} />
       </LineChart>
     </ResponsiveContainer>
@@ -107,7 +114,7 @@ export function ScoreDistChart({ data }: { data: { t: string; mean_score: number
         <CartesianGrid stroke={C.grid} vertical={false} />
         <XAxis dataKey="t" tickFormatter={hm} {...AXIS} minTickGap={28} />
         <YAxis {...AXIS} width={42} domain={[0, 1]} tickFormatter={(v) => v.toFixed(1)} />
-        <Tooltip contentStyle={tip()} labelFormatter={full} formatter={(v: any) => [Number(v).toFixed(3), "mean fraud score"]} />
+        <Tooltip {...TT} cursor={lineCursor} labelFormatter={full} formatter={(v: any) => [Number(v).toFixed(3), "mean fraud score"]} />
         <Area type="monotone" dataKey="mean_score" stroke={C.indigo} fill="url(#gScore)" strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
@@ -122,8 +129,8 @@ export function FeatureImportanceChart({ items }: { items: { feature: string; im
         <CartesianGrid stroke={C.grid} horizontal={false} />
         <XAxis type="number" {...AXIS} tickFormatter={(v) => `${(v * 100).toFixed(0)}%`} />
         <YAxis type="category" dataKey="label" {...AXIS} width={130} />
-        <Tooltip contentStyle={tip()} formatter={(v: any) => [`${(v * 100).toFixed(2)}%`, "importance"]} />
-        <Bar dataKey="importance" fill={C.teal} radius={[0, 4, 4, 0]} />
+        <Tooltip {...TT} cursor={barCursor} formatter={(v: any) => [`${(v * 100).toFixed(2)}%`, "importance"]} />
+        <Bar dataKey="importance" fill={C.teal} radius={[0, 3, 3, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );
@@ -143,7 +150,8 @@ export function ShapBars({ contributions }: { contributions: { feature: string; 
         <YAxis type="category" dataKey="label" {...AXIS} width={130} />
         <ReferenceLine x={0} stroke={C.axis} />
         <Tooltip
-          contentStyle={tip()}
+          {...TT}
+          cursor={barCursor}
           formatter={(v: any, _n: any, p: any) => [
             `${Number(v).toFixed(4)}  (value ${Number(p?.payload?.value).toFixed(3)})`,
             "SHAP",
@@ -180,8 +188,8 @@ export function PsiBars({
         <YAxis type="category" dataKey="label" {...AXIS} width={130} />
         <ReferenceLine x={warn} stroke={C.amber} strokeDasharray="3 3" />
         <ReferenceLine x={alert} stroke={C.red} strokeDasharray="3 3" />
-        <Tooltip contentStyle={tip()} formatter={(v: any) => [Number(v).toFixed(4), "PSI"]} />
-        <Bar dataKey="psi" radius={[0, 4, 4, 0]}>
+        <Tooltip {...TT} cursor={barCursor} formatter={(v: any) => [Number(v).toFixed(4), "PSI"]} />
+        <Bar dataKey="psi" radius={[0, 3, 3, 0]}>
           {data.map((d, i) => (
             <Cell key={i} fill={d.psi >= alert ? C.red : d.psi >= warn ? C.amber : C.teal} />
           ))}
@@ -204,7 +212,7 @@ export function ModelMetricBars({
         <CartesianGrid stroke={C.grid} vertical={false} />
         <XAxis dataKey="model_name" {...AXIS} />
         <YAxis {...AXIS} width={44} domain={[0, 1]} tickFormatter={(v) => v.toFixed(1)} />
-        <Tooltip contentStyle={tip()} formatter={(v: any) => [Number(v).toFixed(4), label]} />
+        <Tooltip {...TT} cursor={barCursor} formatter={(v: any) => [Number(v).toFixed(4), label]} />
         <Bar dataKey="value" radius={[3, 3, 0, 0]} name={label}>
           {models.map((m, i) => (
             <Cell key={i} fill={m.active ? C.teal : C.neutral} />
@@ -215,7 +223,7 @@ export function ModelMetricBars({
   );
 }
 
-// timeline charts used on the drift page
+// drift-page timelines
 export function PsiTimeline({ data }: { data: { t: string; psi: number }[] }) {
   return (
     <ResponsiveContainer width="100%" height={220}>
@@ -231,7 +239,7 @@ export function PsiTimeline({ data }: { data: { t: string; psi: number }[] }) {
         <YAxis {...AXIS} width={44} />
         <ReferenceLine y={0.1} stroke={C.amber} strokeDasharray="3 3" />
         <ReferenceLine y={0.2} stroke={C.red} strokeDasharray="3 3" />
-        <Tooltip contentStyle={tip()} labelFormatter={full} formatter={(v: any) => [Number(v).toFixed(4), "PSI"]} />
+        <Tooltip {...TT} cursor={lineCursor} labelFormatter={full} formatter={(v: any) => [Number(v).toFixed(4), "PSI"]} />
         <Area type="monotone" dataKey="psi" stroke={C.amber} fill="url(#gPsi)" strokeWidth={2} />
       </AreaChart>
     </ResponsiveContainer>
@@ -256,12 +264,13 @@ export function DualLine({
         <XAxis dataKey="t" tickFormatter={hm} {...AXIS} minTickGap={28} />
         <YAxis
           {...AXIS}
-          width={asPercent ? 44 : 44}
+          width={44}
           tickFormatter={asPercent ? (v) => `${(v * 100).toFixed(0)}%` : undefined}
           domain={asPercent ? undefined : [0, "auto"]}
         />
         <Tooltip
-          contentStyle={tip()}
+          {...TT}
+          cursor={lineCursor}
           labelFormatter={full}
           formatter={(v: any, n: any) => [asPercent ? `${(Number(v) * 100).toFixed(2)}%` : Number(v).toFixed(4), n]}
         />

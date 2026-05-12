@@ -1,6 +1,5 @@
-"""In-process background worker: drives the live transaction simulation, runs
-real-time inference on each transaction, and periodically writes drift
-snapshots.  Deliberately a single asyncio task — no Celery/arq/Kafka."""
+"""In-process asyncio worker: simulate → score → store, plus periodic drift
+snapshots and a one-time dashboard backfill.  No Celery/arq/Kafka."""
 from __future__ import annotations
 
 import asyncio
@@ -31,8 +30,8 @@ class _State:
 
 
 STATE = _State()
-_sim = Simulator(seed=settings.sim_seed + 1)   # +1 so live stream != training data
-_HISTORY_LOOKBACK = 60                          # recent txns per user fed to feature builder
+_sim = Simulator(seed=settings.sim_seed + 1)   # != training seed
+_HISTORY_LOOKBACK = 60                          # recent txns/user for the feature builder
 
 
 def get_sim_fraud_rate() -> float:
@@ -115,8 +114,7 @@ async def _maybe_snapshot_drift() -> None:
 
 
 def _backfill_rows(bundle, n: int) -> list[tuple[dict, dict, float, list]]:
-    """CPU-bound part of the backfill — runs in a thread.
-    Returns [(txn, features, proba, top_factors), ...]."""
+    """CPU-bound backfill prep (runs in a thread)."""
     stream = _sim.generate_recent(n, minutes=120.0)
     raw = pd.DataFrame(stream)
     feats_df = build_feature_frame(raw.drop(columns=["is_fraud"]))[FEATURE_NAMES]
@@ -129,7 +127,7 @@ def _backfill_rows(bundle, n: int) -> list[tuple[dict, dict, float, list]]:
         feats = {k: float(v) for k, v in feats_df.iloc[i].to_dict().items()}
         p = float(probas[i])
         top: list = []
-        if p >= bundle.threshold:  # only explain the alerts (cheap & what the UI shows)
+        if p >= bundle.threshold:  # only explain alerts
             try:
                 _, contribs = shap_contributions(bundle.estimator, bundle.feature_names, X[i])
                 top = contribs[:6]

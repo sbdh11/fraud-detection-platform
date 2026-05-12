@@ -1,5 +1,4 @@
-"""SHAP-based explanations for tree models, with a graceful fallback to
-feature-importance-weighted contributions if SHAP is unavailable."""
+"""SHAP explanations for tree models; falls back to importance-weighted scores if SHAP is absent."""
 from __future__ import annotations
 
 import logging
@@ -66,12 +65,11 @@ def shap_contributions(estimator: Any, feature_names: list[str], x_row: np.ndarr
         except Exception as e:  # pragma: no cover
             log.warning("SHAP evaluation failed (%s) — using importance fallback", e)
 
-    # ----- fallback: signed importance-weighted "pseudo-shap" -----
+    # fallback: signed importance-weighted pseudo-SHAP
     imp = np.asarray(getattr(estimator, "feature_importances_", np.ones(len(feature_names))), dtype=float)
     if imp.sum() > 0:
         imp = imp / imp.sum()
     x = x_row.reshape(-1)
-    # centre each feature so the "direction" is meaningful-ish
     pseudo = imp * (np.sign(x) * np.log1p(np.abs(x)))
     contribs = [
         {"feature": n, "value": round(float(v), 6), "shap": round(float(s), 6)}

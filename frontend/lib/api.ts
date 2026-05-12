@@ -1,5 +1,4 @@
-// Tiny typed API client.  Base URL is inlined at build time from
-// NEXT_PUBLIC_API_BASE (see docker-compose / .env). Falls back to the dev port.
+// Typed API client. Base URL inlined at build from NEXT_PUBLIC_API_BASE.
 export const API_BASE =
   (process.env.NEXT_PUBLIC_API_BASE && process.env.NEXT_PUBLIC_API_BASE.replace(/\/$/, "")) ||
   "http://localhost:8008/api";

@@ -80,8 +80,7 @@ async def api_info() -> dict:
             "lite_mode": settings.lite_mode}
 
 
-# In LITE mode the FastAPI app also serves the prebuilt static frontend (Next.js
-# `output: export`).  Mounted last so all /api/* (and /docs) routes win first.
+# LITE mode: serve the exported static frontend (mounted last so /api/* + /docs win)
 if settings.lite_mode and settings.static_dir.exists():
     from fastapi.staticfiles import StaticFiles
 

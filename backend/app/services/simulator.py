@@ -1,10 +1,7 @@
-"""Lightweight synthetic transaction generator.
+"""Synthetic transaction generator — labelled training batches + a live stream.
 
-Produces (a) a labelled batch DataFrame for model training and (b) a live
-stream of single transactions for the dashboard.  Fraud is injected with
-systematic-but-noisy patterns (large amount, risky merchant, away-from-home
-location, night-time, bursts) so the engineered features carry real signal
-without making the problem trivially separable.
+Fraud is injected with noisy patterns (big amount, risky merchant, away-from-home,
+night-time, bursts) so features carry signal without being trivially separable.
 """
 from __future__ import annotations
 
@@ -50,9 +47,7 @@ class _User:
 @dataclass
 class Simulator:
     n_users: int = 400
-    # per-event probability; because a fraud event emits a small burst of rows,
-    # the resulting fraud *fraction* of the dataset lands around ~3-5%.
-    fraud_rate: float = 0.018
+    fraud_rate: float = 0.018          # per-event prob; with bursts → ~3-5% of rows
     seed: int = 42
     rng: np.random.Generator = field(init=False)
     users: list[_User] = field(init=False)
@@ -79,18 +74,16 @@ class Simulator:
     def _normal_txn(self, u: _User, ts: dt.datetime) -> dict:
         amount = max(0.5, float(u.typical_amount * np.exp(self.rng.normal(0.0, 0.45))))
         merchant = self.rng.choice(u.merchants)
-        # subscriptions / atm have characteristic amounts
         if merchant == "atm":
             amount = float(self.rng.choice([20, 40, 60, 80, 100, 200]))
         location = u.home if self.rng.random() < 0.9 else self.rng.choice(LOCATIONS)
         device = u.device if self.rng.random() < 0.85 else self.rng.choice(DEVICES)
-        is_fraud = self.rng.random() < 0.004  # rare "looks-normal" fraud
+        is_fraud = self.rng.random() < 0.004  # rare looks-normal fraud
         return dict(user_id=u.user_id, amount=round(amount, 2), merchant_type=str(merchant),
                     location=str(location), device_type=str(device), ts=ts, is_fraud=bool(is_fraud))
 
     def _fraud_txn(self, u: _User, ts: dt.datetime) -> dict:
-        # ~85% of fraud "looks" suspicious; 15% is camouflaged
-        camouflaged = self.rng.random() < 0.15
+        camouflaged = self.rng.random() < 0.15   # 15% looks legit
         if camouflaged:
             amount = max(0.5, float(u.typical_amount * np.exp(self.rng.normal(0.3, 0.5))))
             merchant = self.rng.choice(u.merchants)
@@ -114,16 +107,13 @@ class Simulator:
         while i < n:
             u = self._user()
             base_ts = start + dt.timedelta(seconds=float(self.rng.uniform(0, span)))
-            # night-time skew for fraud is induced via the fraud flag below
             if self.rng.random() < self.fraud_rate:
-                # fraud often arrives as a small burst on one user
-                burst = int(self.rng.integers(1, 5))
+                burst = int(self.rng.integers(1, 5))   # fraud arrives in bursts
                 for b in range(burst):
                     if i >= n:
                         break
                     ts = base_ts + dt.timedelta(seconds=float(self.rng.exponential(40) * b))
-                    # bias fraud toward late-night hours
-                    if self.rng.random() < 0.55:
+                    if self.rng.random() < 0.55:       # skew fraud to late-night
                         ts = ts.replace(hour=int(self.rng.integers(0, 6)))
                     rows.append(self._fraud_txn(u, ts))
                     i += 1
@@ -131,10 +121,10 @@ class Simulator:
                 rows.append(self._normal_txn(u, base_ts))
                 i += 1
         df = pd.DataFrame(rows).sort_values("ts").reset_index(drop=True)
-        # realistic label noise: a few missed frauds + a few false reports
+        # label noise: a few missed frauds + a few false reports
         is_f = df["is_fraud"].to_numpy(dtype=bool)
-        miss = (self.rng.random(len(df)) < 0.05) & is_f          # ~5% of frauds mislabelled legit
-        false_report = (self.rng.random(len(df)) < 0.004) & ~is_f  # ~0.4% of legit mislabelled fraud
+        miss = (self.rng.random(len(df)) < 0.05) & is_f
+        false_report = (self.rng.random(len(df)) < 0.004) & ~is_f
         df.loc[miss, "is_fraud"] = False
         df.loc[false_report, "is_fraud"] = True
         return df

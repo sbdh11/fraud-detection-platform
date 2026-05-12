@@ -1,10 +1,6 @@
-"""Train & compare fraud models on synthetic data, log to MLflow, persist the
-best one for serving.
-
-Models: XGBoost, LightGBM, RandomForest (baseline).  We do a time-ordered
-train/test split (no shuffling — predicting future fraud), handle class
-imbalance via class weighting, tune the decision threshold on the test set to
-maximise F1, and report ROC-AUC / PR-AUC / precision / recall / F1 / accuracy.
+"""Train & compare XGBoost / LightGBM / RandomForest on synthetic data, log to
+MLflow, persist the best for serving.  Time-ordered split, class weighting,
+F1-tuned threshold; reports ROC-AUC / PR-AUC / precision / recall / F1 / accuracy.
 """
 from __future__ import annotations
 

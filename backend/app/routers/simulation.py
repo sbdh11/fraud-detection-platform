@@ -12,9 +12,7 @@ class SimConfig(BaseModel):
     running: bool | None = None
     interval_seconds: float | None = Field(default=None, gt=0.1, le=30)
     burst: int | None = Field(default=None, ge=1, le=20)
-    # crank this up (e.g. 0.10) to push the operational distribution and watch the
-    # drift detector react — handy for demos.
-    fraud_rate: float | None = Field(default=None, ge=0.0, le=0.5)
+    fraud_rate: float | None = Field(default=None, ge=0.0, le=0.5)  # raise to trigger drift
 
 
 def _state_dict() -> dict:

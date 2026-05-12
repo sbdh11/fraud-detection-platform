@@ -1,12 +1,8 @@
-# ──────────────────────────────────────────────────────────────────────────────
-# LITE single-container build — for Hugging Face Spaces (Docker SDK) or any host
-# that runs one container.  Everything in one process: FastAPI backend (SQLite +
-# file-based MLflow + in-process worker) which also serves the prebuilt static
-# Next.js frontend.  See DEPLOY.md.   For the full multi-service setup use
-# docker-compose.yml instead.
-# ──────────────────────────────────────────────────────────────────────────────
+# LITE single-container build (Hugging Face Spaces / any one-container host):
+# one process — FastAPI (SQLite + file-MLflow + worker) serving the static frontend.
+# For the full multi-service stack use docker-compose.yml. See DEPLOY.md.
 
-# ---- stage 1: build the static frontend (Next.js `output: export`) ----
+# ---- stage 1: static frontend ----
 FROM node:20-alpine AS frontend
 WORKDIR /fe
 COPY frontend/package.json frontend/package-lock.json ./
@@ -42,7 +38,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 COPY backend/app ./app
 COPY --from=frontend /fe/out ./static
 
-# Hugging Face Spaces runs the container as a non-root user — keep these writable.
+# HF Spaces runs as non-root — keep these writable
 RUN mkdir -p /app/data && chmod -R 777 /app/data /app/static
 
 EXPOSE 7860

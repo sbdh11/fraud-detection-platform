@@ -1,11 +1,6 @@
-"""Lightweight drift monitoring.
-
-We compare two windows of the system's *own* predictions — a frozen *reference*
-window (the earliest N predictions, i.e. the regime the model was deployed into)
-and a rolling *current* window (the most-recent N) — using the Population
-Stability Index per engineered feature, plus shifts in fraud rate, alert rate
-and mean model score.  Keeping both windows in the same observation regime
-avoids the apples-to-oranges artefacts of comparing against a synthetic batch.
+"""Drift monitoring: PSI per feature + fraud-rate / alert-rate / mean-score shifts
+between the earliest-N predictions (reference) and the most-recent-N (current).
+Same observation regime on both sides, so no synthetic-vs-live artefacts.
 """
 from __future__ import annotations
 
@@ -57,7 +52,7 @@ def compute_snapshot(reference_rows: list[dict], current_rows: list[dict]) -> di
     """Each row dict needs: ``features`` (dict), ``actual_fraud``,
     ``predicted_fraud``, ``fraud_probability``."""
     n_ref, n_cur = len(reference_rows), len(current_rows)
-    fr_ref, pr_ref, ms_ref = _rates(reference_rows)
+    fr_ref, pr_ref, ms_ref = _rates(reference_rows)   # always computable
     fr_cur, pr_cur, ms_cur = _rates(current_rows)
     base = dict(
         n_reference=n_ref, n_current=n_cur,
@@ -65,7 +60,7 @@ def compute_snapshot(reference_rows: list[dict], current_rows: list[dict]) -> di
         pred_rate_reference=round(pr_ref, 5), pred_rate_current=round(pr_cur, 5),
         mean_score_reference=round(ms_ref, 5), mean_score_current=round(ms_cur, 5),
     )
-    if n_ref < MIN_WINDOW or n_cur < MIN_WINDOW:
+    if n_ref < MIN_WINDOW or n_cur < MIN_WINDOW:   # warming up
         return {**base, "feature_psi": {}, "overall_psi": 0.0, "drift_flag": False}
 
     ref_df = pd.DataFrame([r["features"] for r in reference_rows]).reindex(columns=FEATURE_NAMES).fillna(0.0)

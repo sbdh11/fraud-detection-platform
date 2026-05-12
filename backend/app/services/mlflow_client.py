@@ -1,5 +1,4 @@
-"""Thin MLflow wrapper that degrades gracefully when the tracking server is
-unreachable (e.g. local dev without the compose stack)."""
+"""Thin MLflow wrapper — no-ops gracefully if MLflow/the tracking server is absent."""
 from __future__ import annotations
 
 import contextlib

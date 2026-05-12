@@ -30,8 +30,7 @@ class Transaction(Base):
     merchant_type: Mapped[str] = mapped_column(String(32), index=True)
     location: Mapped[str] = mapped_column(String(48))
     device_type: Mapped[str] = mapped_column(String(16))
-    # ground-truth label produced by the simulator (rule + noise) — used for monitoring & retrain
-    is_fraud: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    is_fraud: Mapped[bool] = mapped_column(Boolean, default=False, index=True)  # simulator ground truth
 
 
 class Prediction(Base):

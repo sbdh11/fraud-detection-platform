@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     OMP_NUM_THREADS=2
 
-# libgomp1 is required by lightgbm/xgboost; curl for the container healthcheck
+# libgomp1: lightgbm/xgboost · curl: healthcheck
 RUN apt-get update && apt-get install -y --no-install-recommends \
         libgomp1 curl \
     && rm -rf /var/lib/apt/lists/*

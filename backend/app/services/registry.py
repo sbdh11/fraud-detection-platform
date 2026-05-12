@@ -1,6 +1,5 @@
-"""Glue between the (CPU-bound, synchronous) training pipeline and the async
-web app / database: runs training off the event loop, persists artifacts,
-records ``ModelRun`` rows, and refreshes the live inference bundle."""
+"""Runs training off the event loop, persists artifacts, records ModelRun rows,
+refreshes the live inference bundle, and switches the active model."""
 from __future__ import annotations
 
 import asyncio

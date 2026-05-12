@@ -1,11 +1,9 @@
-"""Feature engineering pipeline.
+"""Feature engineering.
 
-A single vectorised entry point — :func:`build_feature_frame` — turns a raw
-transaction DataFrame (ordered by time) into the model feature matrix.  All
-rolling/aggregate features for a row use only that user's *prior* rows, so
-there is no label/lookahead leakage.  The online path
-(:func:`compute_features_online`) reuses the exact same function on
-``history + new_row`` and keeps the last row, guaranteeing train/serve parity.
+`build_feature_frame` vectorises a time-ordered transaction DataFrame into the
+model matrix using only each user's *prior* rows (no lookahead leakage).
+`compute_features_online` runs the same function on history+new_row and keeps
+the last row — guarantees train/serve parity.
 """
 from __future__ import annotations
 
@@ -55,8 +53,7 @@ def _per_user_time_windows(g: pd.DataFrame) -> pd.DataFrame:
 
 
 def build_feature_frame(df: pd.DataFrame) -> pd.DataFrame:
-    """Return a DataFrame with exactly the columns in :data:`FEATURE_NAMES`
-    (plus the index of the input preserved via ``order``)."""
+    """Raw transactions → a DataFrame with exactly FEATURE_NAMES (input order kept)."""
     if df.empty:
         return pd.DataFrame(columns=FEATURE_NAMES)
 
@@ -70,7 +67,7 @@ def build_feature_frame(df: pd.DataFrame) -> pd.DataFrame:
 
     grp = d.groupby("user_id", sort=False, group_keys=False)
 
-    # prior-window amount stats (shifted so the current row is excluded)
+    # prior-window amount stats (shift → exclude current row)
     d["_prev_mean"] = grp["amount"].transform(lambda s: s.rolling(20, min_periods=1).mean().shift(1))
     d["_prev_std"] = grp["amount"].transform(lambda s: s.rolling(20, min_periods=2).std().shift(1))
     d["user_txn_count"] = grp.cumcount().astype(float)
@@ -84,7 +81,7 @@ def build_feature_frame(df: pd.DataFrame) -> pd.DataFrame:
     d["location_changed"] = ((d["location"] != prev_loc) & prev_loc.notna()).astype(float)
     d["is_new_location"] = (~d.groupby("user_id")["location"].transform(lambda s: s.duplicated(keep="first"))).astype(float)
 
-    # fill first-transaction NaNs with sane defaults
+    # first-txn NaN → defaults
     d["_prev_mean"] = d["_prev_mean"].fillna(d["amount"])
     d["_prev_std"] = d["_prev_std"].fillna(0.0)
     d["secs_since_last"] = d["secs_since_last"].fillna(7 * 24 * 3600).clip(lower=0, upper=7 * 24 * 3600)
@@ -113,8 +110,7 @@ def build_feature_frame(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def compute_features_online(history: pd.DataFrame, new_txn: dict) -> dict:
-    """Compute the feature vector for one incoming transaction given the user's
-    recent transaction `history` (may be empty)."""
+    """Feature vector for one incoming transaction given the user's recent history."""
     cols = _RAW_COLS
     hist = history[cols].copy() if not history.empty else pd.DataFrame(columns=cols)
     row = {c: new_txn.get(c) for c in cols}
