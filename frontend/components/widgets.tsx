@@ -63,24 +63,17 @@ export const fmt = {
 export function PageHeader({
   title,
   subtitle,
-  icon,
   right,
 }: {
   title: string;
   subtitle?: string;
-  icon?: React.ReactNode;
   right?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-      <div className="flex items-start gap-3">
-        {icon && (
-          <div className="mt-0.5 rounded-lg border border-border/70 bg-card p-2 text-primary">{icon}</div>
-        )}
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground md:text-2xl">{title}</h1>
-          {subtitle && <p className="mt-1 max-w-3xl text-sm text-muted-foreground">{subtitle}</p>}
-        </div>
+    <div className="mb-5 flex flex-wrap items-end justify-between gap-3 border-b border-border/70 pb-4">
+      <div>
+        <h1 className="text-lg font-semibold tracking-tight text-foreground">{title}</h1>
+        {subtitle && <p className="mt-1 max-w-3xl text-[13px] text-muted-foreground">{subtitle}</p>}
       </div>
       {right}
     </div>
@@ -100,23 +93,18 @@ export function Stat({
   label,
   value,
   hint,
-  icon,
   tone = "default",
 }: {
   label: string;
   value: React.ReactNode;
   hint?: React.ReactNode;
-  icon?: React.ReactNode;
   tone?: Tone;
 }) {
   return (
-    <div className="rounded-xl border border-border/70 bg-card p-4">
-      <div className="flex items-center justify-between">
-        <span className="text-[11px] uppercase tracking-widest text-muted-foreground">{label}</span>
-        {icon && <span className="text-muted-foreground/70">{icon}</span>}
-      </div>
-      <div className={cn("mt-1.5 text-2xl font-semibold tabular", TONE[tone])}>{value}</div>
-      {hint != null && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
+    <div className="rounded-md border border-border bg-card px-4 py-3">
+      <div className="text-[10.5px] font-medium uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={cn("mt-1 text-[22px] font-semibold leading-tight tabular", TONE[tone])}>{value}</div>
+      {hint != null && <div className="mt-0.5 text-[11px] text-muted-foreground">{hint}</div>}
     </div>
   );
 }

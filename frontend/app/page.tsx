@@ -2,16 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  Activity,
-  AlertTriangle,
-  CircleDollarSign,
-  Gauge,
-  LayoutDashboard,
-  RefreshCw,
-  ShieldCheck,
-  Target,
-} from "lucide-react";
 import { api, DashboardSummary, FeedRow, TimeseriesPoint } from "@/lib/api";
 import { FraudRateChart, LatencyChart, ScoreDistChart, VolumeChart } from "@/components/Charts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -77,7 +67,7 @@ export default function DashboardPage() {
   if (!summary) {
     return (
       <div>
-        <PageHeader title="Live Fraud Dashboard" subtitle="Streaming transactions scored in real time" icon={<LayoutDashboard className="size-5" />} />
+        <PageHeader title="Live Fraud Dashboard" subtitle="Streaming transactions scored in real time" />
         {err ? <ErrorNote msg={err} /> : <Spinner label="connecting to API…" />}
       </div>
     );
@@ -90,15 +80,14 @@ export default function DashboardPage() {
       <PageHeader
         title="Live Fraud Dashboard"
         subtitle="Synthetic financial transactions stream in and are scored by the active model in real time."
-        icon={<LayoutDashboard className="size-5" />}
         right={
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <label className="flex items-center gap-2 text-[13px] text-muted-foreground">
               <Switch checked={summary.simulation_running} onCheckedChange={toggleSim} />
-              {summary.simulation_running ? "Simulation on" : "Simulation off"}
-            </div>
+              {summary.simulation_running ? "simulation on" : "simulation off"}
+            </label>
             <Button variant="outline" size="sm" onClick={retrain} disabled={busy}>
-              <RefreshCw className="size-3.5" /> Retrain models
+              Retrain models
             </Button>
             <Badge variant={summary.active_model ? "primary" : "warning"}>
               {summary.active_model ? `model: ${summary.active_model}` : "no model"}
@@ -111,33 +100,24 @@ export default function DashboardPage() {
       {trainMsg && <Note>{trainMsg}</Note>}
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-        <Stat label="Transactions" value={fmt.num(summary.total_transactions)} hint="processed" icon={<Activity className="size-4" />} />
-        <Stat label="Predictions" value={fmt.num(summary.total_predictions)} icon={<Target className="size-4" />} />
+        <Stat label="Transactions" value={fmt.num(summary.total_transactions)} hint="processed" />
+        <Stat label="Predictions" value={fmt.num(summary.total_predictions)} />
         <Stat
           label="Fraud alerts"
           value={fmt.num(summary.fraud_alerts)}
           tone="destructive"
           hint={`${fmt.pct(summary.fraud_rate, 2)} of predictions`}
-          icon={<AlertTriangle className="size-4" />}
         />
-        <Stat
-          label="Inference latency"
-          value={fmt.ms(summary.avg_latency_ms)}
-          hint={`p95 ${fmt.ms(summary.p95_latency_ms)}`}
-          tone="primary"
-          icon={<Gauge className="size-4" />}
-        />
+        <Stat label="Inference latency" value={fmt.ms(summary.avg_latency_ms)} hint={`p95 ${fmt.ms(summary.p95_latency_ms)}`} tone="primary" />
         <Stat
           label="ROC-AUC"
           value={summary.roc_auc != null ? summary.roc_auc.toFixed(3) : "—"}
           hint={`threshold ${summary.threshold != null ? summary.threshold.toFixed(3) : "—"}`}
-          icon={<ShieldCheck className="size-4" />}
         />
         <Stat
           label="Precision / Recall"
           value={`${fmt.pct(summary.precision ?? null, 0)} / ${fmt.pct(summary.recall ?? null, 0)}`}
           hint="on labelled stream"
-          icon={<CircleDollarSign className="size-4" />}
         />
       </div>
 

@@ -24,7 +24,7 @@ const C = {
   sky: "hsl(var(--chart-5))",
   grid: "hsl(var(--border))",
   axis: "hsl(var(--muted-foreground))",
-  blue: "hsl(217 91% 60%)",
+  neutral: "hsl(220 8% 40%)",
 };
 const AXIS = { stroke: C.axis, fontSize: 11 } as const;
 
@@ -205,9 +205,9 @@ export function ModelMetricBars({
         <XAxis dataKey="model_name" {...AXIS} />
         <YAxis {...AXIS} width={44} domain={[0, 1]} tickFormatter={(v) => v.toFixed(1)} />
         <Tooltip contentStyle={tip()} formatter={(v: any) => [Number(v).toFixed(4), label]} />
-        <Bar dataKey="value" radius={[4, 4, 0, 0]} name={label}>
+        <Bar dataKey="value" radius={[3, 3, 0, 0]} name={label}>
           {models.map((m, i) => (
-            <Cell key={i} fill={m.active ? C.teal : C.blue} />
+            <Cell key={i} fill={m.active ? C.teal : C.neutral} />
           ))}
         </Bar>
       </BarChart>

@@ -4,40 +4,40 @@
 
 @layer base {
   :root {
-    /* shadcn-style tokens — dark by default for this app */
-    --background: 240 10% 4%;
-    --foreground: 0 0% 95%;
-    --card: 240 8% 6.5%;
-    --card-foreground: 0 0% 95%;
-    --popover: 240 10% 5%;
-    --popover-foreground: 0 0% 95%;
-    --primary: 172 66% 50%;            /* teal accent */
-    --primary-foreground: 240 10% 4%;
-    --secondary: 240 6% 12%;
-    --secondary-foreground: 0 0% 95%;
-    --muted: 240 6% 12%;
-    --muted-foreground: 240 5% 62%;
-    --accent: 240 6% 15%;
-    --accent-foreground: 0 0% 95%;
-    --destructive: 350 89% 60%;
+    /* "graphite" engineering-console theme — dark, cool slate, steel-blue accent */
+    --background: 220 14% 9%;
+    --foreground: 215 16% 88%;
+    --card: 220 13% 11.5%;
+    --card-foreground: 215 16% 88%;
+    --popover: 220 14% 10%;
+    --popover-foreground: 215 16% 88%;
+    --primary: 212 58% 56%;             /* steel blue */
+    --primary-foreground: 220 14% 9%;
+    --secondary: 220 11% 16%;
+    --secondary-foreground: 215 16% 88%;
+    --muted: 220 11% 16%;
+    --muted-foreground: 218 10% 56%;
+    --accent: 220 10% 19%;
+    --accent-foreground: 215 16% 90%;
+    --destructive: 358 62% 55%;
     --destructive-foreground: 0 0% 100%;
-    --success: 142 71% 45%;
+    --success: 152 44% 44%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 92% 50%;
-    --warning-foreground: 240 10% 4%;
-    --border: 240 6% 16%;
-    --input: 240 6% 16%;
-    --ring: 172 66% 50%;
-    --chart-1: 172 66% 50%;
-    --chart-2: 350 89% 60%;
-    --chart-3: 245 58% 67%;
-    --chart-4: 38 92% 55%;
-    --chart-5: 199 89% 56%;
-    --radius: 0.7rem;
-    --sidebar-background: 240 10% 5%;
-    --sidebar-foreground: 0 0% 88%;
-    --sidebar-accent: 240 6% 12%;
-    --sidebar-border: 240 6% 14%;
+    --warning: 36 74% 52%;
+    --warning-foreground: 220 14% 9%;
+    --border: 220 10% 19%;
+    --input: 220 10% 19%;
+    --ring: 212 58% 56%;
+    --chart-1: 212 58% 58%;
+    --chart-2: 358 62% 58%;
+    --chart-3: 264 38% 62%;
+    --chart-4: 36 74% 55%;
+    --chart-5: 178 40% 46%;
+    --radius: 0.375rem;
+    --sidebar-background: 220 14% 8%;
+    --sidebar-foreground: 215 14% 80%;
+    --sidebar-accent: 220 11% 14%;
+    --sidebar-border: 220 10% 16%;
   }
 }
 
@@ -47,9 +47,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-image: radial-gradient(1200px 600px at 85% -10%, hsl(172 66% 50% / 0.07), transparent 60%),
-      radial-gradient(900px 500px at -10% 110%, hsl(245 58% 60% / 0.06), transparent 60%);
-    min-height: 100vh;
+    font-feature-settings: "cv05", "cv08", "ss03";
+    -webkit-font-smoothing: antialiased;
   }
 }
 
@@ -57,9 +56,11 @@
   scrollbar-width: thin;
   scrollbar-color: hsl(var(--border)) transparent;
 }
-*::-webkit-scrollbar { height: 8px; width: 8px; }
-*::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 8px; }
+*::-webkit-scrollbar { height: 9px; width: 9px; }
+*::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 2px; }
+*::-webkit-scrollbar-thumb:hover { background: hsl(220 8% 26%); }
 
 .tabular {
   font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }

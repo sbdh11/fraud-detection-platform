@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { BarChart3, RefreshCw } from "lucide-react";
 import { api, ModelRun } from "@/lib/api";
 import { ModelMetricBars } from "@/components/Charts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -86,11 +85,10 @@ export default function ModelsPage() {
       <PageHeader
         title="Model Comparison"
         subtitle="XGBoost vs LightGBM vs a RandomForest baseline — trained on the same synthetic data, tracked in MLflow."
-        icon={<BarChart3 className="size-5" />}
         right={
           <div className="flex items-center gap-3">
             <Button variant="subtle" size="sm" onClick={retrain} disabled={busy === "__train__" || training?.running}>
-              <RefreshCw className="size-3.5" /> {training?.running ? "training…" : "Retrain all models"}
+              {training?.running ? "training…" : "Retrain all models"}
             </Button>
             {activeName && <Badge variant="primary">active: {activeName}</Badge>}
           </div>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Activity, RotateCw, Zap } from "lucide-react";
 import { api, DriftSnapshot, SimState } from "@/lib/api";
 import { CHART_COLORS, DualLine, PsiBars, PsiTimeline } from "@/components/Charts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -76,14 +75,13 @@ export default function DriftPage() {
       <PageHeader
         title="Drift Monitoring"
         subtitle="Population Stability Index on engineered features, plus fraud-rate and score-distribution shifts vs the reference (deploy-time) window."
-        icon={<Activity className="size-5" />}
         right={
           <div className="flex flex-wrap items-center gap-3">
             {sim && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <span>sim fraud rate {fmt.pct(sim.fraud_rate, 1)}</span>
                 <Button variant="outline" size="sm" onClick={() => stress(0.12)} disabled={busy} title="raise the simulator's fraud rate to push the live distribution">
-                  <Zap className="size-3.5" /> stress test
+                  stress test
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => stress(0.018)} disabled={busy}>
                   reset
@@ -91,7 +89,7 @@ export default function DriftPage() {
               </div>
             )}
             <Button variant="outline" size="sm" onClick={runNow} disabled={busy}>
-              <RotateCw className="size-3.5" /> Run drift check
+              Run drift check
             </Button>
             {latest && <Badge variant={latest.drift_flag ? "destructive" : "success"}>{latest.drift_flag ? "DRIFT DETECTED" : "stable"}</Badge>}
           </div>

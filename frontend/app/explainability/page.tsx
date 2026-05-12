@@ -2,7 +2,6 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Sparkles } from "lucide-react";
 import { api, ExplainResponse, FeedRow, Prediction } from "@/lib/api";
 import { FeatureImportanceChart, ShapBars } from "@/components/Charts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -85,7 +84,6 @@ function Explainability() {
       <PageHeader
         title="Explainability"
         subtitle="Global feature importance and per-prediction SHAP attributions — why the model flagged a transaction."
-        icon={<Sparkles className="size-5" />}
         right={importance ? <Badge variant="primary">model: {importance.model_name}</Badge> : null}
       />
       {err && <ErrorNote msg={err} />}
