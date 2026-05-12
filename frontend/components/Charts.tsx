@@ -28,7 +28,7 @@ const C = {
 };
 const AXIS = { stroke: C.axis, fontSize: 11 } as const;
 
-// Recharts defaults render light — force dark
+// Recharts defaults render light; force dark
 const TT = {
   contentStyle: {
     background: "hsl(var(--popover))",

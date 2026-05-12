@@ -1,4 +1,4 @@
-"""Thin MLflow wrapper — no-ops gracefully if MLflow/the tracking server is absent."""
+"""Thin MLflow wrapper: no-ops gracefully if MLflow / the tracking server is absent."""
 from __future__ import annotations
 
 import contextlib
@@ -23,7 +23,7 @@ def _client():
         return mlflow
     except Exception as e:  # pragma: no cover
         if _AVAILABLE is not False:
-            log.warning("MLflow unavailable (%s) — tracking disabled", e)
+            log.warning("MLflow unavailable (%s): tracking disabled", e)
         _AVAILABLE = False
         return None
 
@@ -39,7 +39,7 @@ def run(name: str):
         with mlflow.start_run(run_name=name) as r:
             yield _Run(mlflow, r.info.run_id)
     except Exception as e:  # pragma: no cover
-        log.warning("MLflow run failed (%s) — continuing without tracking", e)
+        log.warning("MLflow run failed (%s): continuing without tracking", e)
         yield _NoopRun()
 
 

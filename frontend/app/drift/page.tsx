@@ -100,7 +100,7 @@ export default function DriftPage() {
       {!latest ? (
         <Card>
           <CardContent className="pt-5">
-            <Spinner label="no drift snapshot yet — the worker writes one every ~30 s, or click “Run drift check”." />
+            <Spinner label="no drift snapshot yet: the worker writes one every ~30 s, or click “Run drift check”." />
           </CardContent>
         </Card>
       ) : (

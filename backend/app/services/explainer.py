@@ -22,7 +22,7 @@ def _get_explainer(estimator: Any):
         _CACHE[key] = expl
         return expl
     except Exception as e:  # pragma: no cover
-        log.warning("SHAP TreeExplainer unavailable (%s) — using importance fallback", e)
+        log.warning("SHAP TreeExplainer unavailable (%s): importance fallback", e)
         _CACHE[key] = None
         return None
 
@@ -63,7 +63,7 @@ def shap_contributions(estimator: Any, feature_names: list[str], x_row: np.ndarr
             contribs.sort(key=lambda d: -abs(d["shap"]))
             return base_v, contribs
         except Exception as e:  # pragma: no cover
-            log.warning("SHAP evaluation failed (%s) — using importance fallback", e)
+            log.warning("SHAP evaluation failed (%s): importance fallback", e)
 
     # fallback: signed importance-weighted pseudo-SHAP
     imp = np.asarray(getattr(estimator, "feature_importances_", np.ones(len(feature_names))), dtype=float)

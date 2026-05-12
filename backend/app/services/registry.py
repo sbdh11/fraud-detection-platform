@@ -45,7 +45,7 @@ async def train_and_register(rows: int | None = None, set_active: str | None = N
                                   "metrics": mr.metrics, "threshold": mr.threshold})
             inference.get_bundle(force=True)
             _STATUS.update(running=False, last_finished_at=_now_iso(), last_error=None)
-            log.info("training complete — active=%s", active_name)
+            log.info("training complete: active=%s", active_name)
             return saved
         except Exception as e:  # pragma: no cover
             _STATUS.update(running=False, last_error=str(e))
@@ -69,9 +69,9 @@ async def ensure_model_trained() -> None:
             has_rows = (await session.execute(select(ModelRun.id).limit(1))).first() is not None
         if has_rows:
             inference.get_bundle(force=True)
-            log.info("found existing trained model — skipping startup training")
+            log.info("found existing trained model: skipping startup training")
             return
-    log.info("no trained model on disk/db — training on startup")
+    log.info("no trained model on disk/db: training on startup")
     await train_and_register()
 
 

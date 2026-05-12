@@ -20,7 +20,7 @@ router = APIRouter(tags=["predictions"])
 async def predict(req: PredictRequest, session: AsyncSession = Depends(get_session)):
     bundle = inference.get_bundle()
     if bundle is None:
-        raise HTTPException(503, "no active model — train one first (POST /api/models/train)")
+        raise HTTPException(503, "no active model: train one first (POST /api/models/train)")
     txn = req.model_dump()
     store = txn.pop("store", True)
     ts = txn.get("ts") or dt.datetime.now(dt.timezone.utc)
@@ -74,7 +74,7 @@ async def recent_alerts(session: AsyncSession = Depends(get_session), limit: int
 @router.get("/feed")
 async def transaction_feed(session: AsyncSession = Depends(get_session),
                            limit: int = Query(40, le=300), fraud_only: bool = False):
-    """Recent transactions joined with their prediction — what the live feed renders."""
+    """Recent transactions joined with their prediction: what the live feed renders."""
     from ..models import Transaction
 
     stmt = (

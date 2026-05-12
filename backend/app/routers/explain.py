@@ -22,7 +22,7 @@ async def explain_transaction(
     session: AsyncSession = Depends(get_session),
 ):
     if inference.get_bundle() is None:
-        raise HTTPException(503, "no active model — train one first")
+        raise HTTPException(503, "no active model: train one first")
     txn = req.model_dump()
     txn.pop("store", None)
     txn["ts"] = txn.get("ts") or dt.datetime.now(dt.timezone.utc)

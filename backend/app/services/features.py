@@ -3,7 +3,7 @@
 `build_feature_frame` vectorises a time-ordered transaction DataFrame into the
 model matrix using only each user's *prior* rows (no lookahead leakage).
 `compute_features_online` runs the same function on history+new_row and keeps
-the last row — guarantees train/serve parity.
+the last row, guaranteeing train/serve parity.
 """
 from __future__ import annotations
 

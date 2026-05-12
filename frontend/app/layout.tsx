@@ -17,9 +17,9 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FraudWatch — Real-Time Fraud Detection Platform",
+  title: "FraudWatch · Real-Time Fraud Detection Platform",
   description:
-    "Live fraud scoring, model comparison, SHAP explainability, and drift monitoring — an ML systems engineering project.",
+    "Live fraud scoring, model comparison, SHAP explainability, and drift monitoring; an ML systems engineering project.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

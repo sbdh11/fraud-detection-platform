@@ -1,4 +1,4 @@
-"""Synthetic transaction generator — labelled training batches + a live stream.
+"""Synthetic transaction generator: labelled training batches plus a live stream.
 
 Fraud is injected with noisy patterns (big amount, risky merchant, away-from-home,
 night-time, bursts) so features carry signal without being trivially separable.

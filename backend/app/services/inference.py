@@ -86,7 +86,7 @@ class PredictionResult:
 def predict(features: dict, *, top_k: int = 6, with_shap: bool = True) -> PredictionResult:
     bundle = get_bundle()
     if bundle is None:
-        raise RuntimeError("no active model — train one first (POST /api/models/train)")
+        raise RuntimeError("no active model: train one first (POST /api/models/train)")
     x = _vectorise(features)
     t0 = time.perf_counter()
     proba = float(bundle.estimator.predict_proba(x)[0, 1])

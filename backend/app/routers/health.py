@@ -22,7 +22,7 @@ async def health(session: AsyncSession = Depends(get_session)) -> dict:
 
     uri = settings.mlflow_tracking_uri
     if uri.startswith("file:"):
-        mlflow_ok = True  # local file store — always available
+        mlflow_ok = True  # local file store, always available
     else:
         mlflow_ok = False
         try:

@@ -69,7 +69,7 @@ export default function ModelsPage() {
     setMsg(null);
     try {
       await api.train();
-      setMsg("Training started — refresh in ~30–60 s.");
+      setMsg("Training started. Refresh in about a minute.");
     } catch (e: any) {
       setMsg(`Could not start training: ${e?.message ?? e}`);
     } finally {
@@ -84,7 +84,7 @@ export default function ModelsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Model Comparison"
-        subtitle="XGBoost vs LightGBM vs a RandomForest baseline — trained on the same synthetic data, tracked in MLflow."
+        subtitle="XGBoost vs LightGBM vs a RandomForest baseline, trained on the same synthetic data, tracked in MLflow."
         right={
           <div className="flex items-center gap-3">
             <Button variant="subtle" size="sm" onClick={retrain} disabled={busy === "__train__" || training?.running}>

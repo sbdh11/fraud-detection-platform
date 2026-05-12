@@ -83,7 +83,7 @@ function Explainability() {
     <div className="space-y-6">
       <PageHeader
         title="Explainability"
-        subtitle="Global feature importance and per-prediction SHAP attributions — why the model flagged a transaction."
+        subtitle="Global feature importance and per-prediction SHAP attributions: why the model flagged a transaction."
         right={importance ? <Badge variant="primary">model: {importance.model_name}</Badge> : null}
       />
       {err && <ErrorNote msg={err} />}

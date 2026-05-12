@@ -56,7 +56,7 @@ export default function DashboardPage() {
     setTrainMsg(null);
     try {
       await api.train();
-      setTrainMsg("Training started — models retrain on synthetic data and update in ~30–60 s.");
+      setTrainMsg("Training started. Models retrain on synthetic data and update in about a minute.");
     } catch (e: any) {
       setTrainMsg(`Could not start training: ${e?.message ?? e}`);
     } finally {
