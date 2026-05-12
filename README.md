@@ -15,7 +15,10 @@ A tool for **scoring card transactions for fraud in real time**, not a toy class
 transactions stream in continuously, an ML model flags the suspicious ones live, and you can inspect
 why it decided that, watch for drift, and compare models.
 
-### Screenshots
+### Preview
+
+![Demo](assets/demo.gif)
+*Live scoring, explanations, drift, model comparison*
 
 ![Live Dashboard](assets/dashboard.png)
 *Live fraud dashboard*
