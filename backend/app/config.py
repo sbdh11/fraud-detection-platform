@@ -61,7 +61,7 @@ class Settings(BaseSettings):
             self.artifacts_dir = self.data_dir / "artifacts"
         else:
             if not self.database_url:
-                self.database_url = "postgresql+asyncpg://fraud:fraud@db:5432/fraud"
+                self.database_url = "postgresql+asyncpg://app:app@db:5432/frauddetect"
             if not self.mlflow_tracking_uri:
                 self.mlflow_tracking_uri = "http://mlflow:5000"
         self.artifacts_dir.mkdir(parents=True, exist_ok=True)

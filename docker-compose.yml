@@ -4,13 +4,13 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_USER: fraud
-      POSTGRES_PASSWORD: fraud
-      POSTGRES_DB: fraud
+      POSTGRES_USER: ${DB_USER:-app}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-app}
+      POSTGRES_DB: ${DB_NAME:-frauddetect}
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fraud -d fraud"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-app} -d ${DB_NAME:-frauddetect}"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -38,7 +38,7 @@ services:
   backend:
     build: ./backend
     environment:
-      DATABASE_URL: postgresql+asyncpg://fraud:fraud@db:5432/fraud
+      DATABASE_URL: postgresql+asyncpg://${DB_USER:-app}:${DB_PASSWORD:-app}@db:5432/${DB_NAME:-frauddetect}
       MLFLOW_TRACKING_URI: http://mlflow:5000
       MLFLOW_EXPERIMENT: fraud-detection
       SIM_ENABLED: "true"
