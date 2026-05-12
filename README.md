@@ -20,15 +20,6 @@ why it decided that, watch for drift, and compare models.
 ![Demo](assets/demo.gif)
 *Live scoring, explanations, drift, model comparison*
 
-![Live Dashboard](assets/dashboard.png)
-*Live fraud dashboard*
-
-![Explainability](assets/explainability.png)
-*Per-prediction SHAP attributions*
-
-![Drift](assets/drift.png)
-*Drift monitoring*
-
 ## What you can do
 
 - **Watch** : a live feed of transactions with fraud probability and the model's verdict, plus a feed of alerts.
